@@ -74,21 +74,15 @@ extension SoilEndpoint {
 
     public func buildUrl(configuration: SoilEndpointConfiguration? = .shared) -> URL? {
 
-        guard var url = URLComponents(string: "\(configuration?.baseUrl ?? "")\(path)"), queryData.count > 0 else {
+        guard var url = URLComponents(string: "\(configuration?.baseUrl ?? "")\(path)") else {
             return nil
         }
 
-        url.queryItems = []
-
-        self.queryData.forEach { key, value in
-            if (value.isEmpty) {
-                url.queryItems?.append(.init(name: key, value: nil))
-            } else {
-                url.queryItems?.append(.init(name: key, value: value))
-            }
+        if queryData.count > 0 {
+            url.queryItems = self.queryData
+                .map { .init(name: $0, value: $1.isEmpty ? nil : $1) }
+                .sorted { $0.name.compare($1.name) != .orderedAscending }
         }
-
-        url.queryItems?.sort { $0.name.compare($1.name) != .orderedAscending }
 
         return url.url
     }
