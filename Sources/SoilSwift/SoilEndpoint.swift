@@ -74,7 +74,7 @@ extension SoilEndpoint {
 
     public func buildUrl(configuration: SoilEndpointConfiguration? = .shared) -> URL? {
 
-        guard var url = URLComponents(string: "\(configuration?.baseUrl ?? "")\(path)") else {
+        guard var url = URLComponents(string: "\(configuration?.baseUrl ?? "")\(path)"), queryData.count > 0 else {
             return nil
         }
 
@@ -108,7 +108,7 @@ extension SoilEndpoint {
             .dataTaskPublisher(for: request)
             .tryMap { data, response -> Response in
                 if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode > 299 {
-                    assertionFailure("Invalid response")
+                    assertionFailure("Non successful response: \(httpResponse.statusCode)")
                 } else {
                     return try self.decode(config: configuration, response: data)
                 }
